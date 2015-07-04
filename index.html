@@ -14,7 +14,7 @@
       </label>
     </div>
 
-    <!-- <div id="webglviewer"></div> -->
+    <div id="webglviewer"></div>
     <video id="video"></video>
     <div class="arrows-container">
       <div class="arrow arrowLeft opacity">➯</div>
@@ -33,7 +33,7 @@
     <script src="js/third-party/threejs/three.js"></script>
     <script src="js/third-party/threejs/StereoEffect.js"></script>
     <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
-    <!-- <script src="js/video.js"></script> -->
+    <script src="js/video.js"></script>
 
     <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
 
@@ -52,6 +52,21 @@
         var messageTimout;
         var pusher;
         var channel;
+
+        function fullscreen() {
+          if (webglviewer.requestFullscreen) {
+            webglviewer.requestFullscreen();
+          } else if (webglviewer.msRequestFullscreen) {
+            webglviewer.msRequestFullscreen();
+          } else if (webglviewer.mozRequestFullScreen) {
+            webglviewer.mozRequestFullScreen();
+          } else if (webglviewer.webkitRequestFullscreen) {
+            webglviewer.webkitRequestFullscreen();
+          }
+
+        }
+
+        $('.arrow').on('click', fullscreen);
 
         var setupRoleToggle = function () {
           var $roleToggle = $('.toggleRole');
@@ -87,18 +102,10 @@
             peer.on('open', function(id) {
               console.log('My peer ID is: ' + id);
             });
-
-            var conn = peer.connect(otherUser);
-            conn.on('open', function(){
-              conn.send('hi!');
-            });
             peer.on('call', function(call) {
               call.answer();
               call.on('stream', function(stream) {
-                video.src = URL.createObjectURL(stream);
-                video.style.width = '100%';
-                video.style.height = '100%';
-                video.play();
+                videoInit(stream);
               });
             });
             if(currentRole === 'puppet'){
@@ -107,10 +114,22 @@
                   optional: [{facingMode: "environment"}]
                 }
               };
-              navigator.getUserMedia(options, function(stream){
-                var call = peer.call(otherUser, stream);
-              }, function(){
-                console.log('Failed to get local stream' ,err);
+              MediaStreamTrack.getSources(function(sources) {
+                for (var i = 0; i !== sources.length; ++i) {
+                  var source = sources[i];
+                  if (source.kind === 'video') {
+                    if (source.facing && source.facing == "environment") {
+                      options.video.optional.push({'sourceId': source.id});
+                    }
+                  }
+                }
+
+                navigator.getUserMedia(options, function(stream){
+                  var call = peer.call(otherUser, stream);
+                  videoInit();
+                }, function(){
+                  console.log('Failed to get local stream' ,err);
+                });
               });
             }
 
