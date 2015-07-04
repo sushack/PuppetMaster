@@ -13,17 +13,18 @@
         <input type="radio" name="role" value="puppet" class="toggleRole" checked/> Puppet
       </label>
     </div>
+    <div id="container">
+      <div id="webglviewer"></div>
+      <video id="video"></video>
+      <div class="arrows-container">
+        <div class="arrow arrowLeft opacity">➯</div>
+        <div class="arrow arrowRight opacity">➯</div>
+      </div>
 
-    <div id="webglviewer"></div>
-    <video id="video"></video>
-    <div class="arrows-container">
-      <div class="arrow arrowLeft opacity">➯</div>
-      <div class="arrow arrowRight opacity">➯</div>
-    </div>
-
-    <div class="arrows-container">
-      <div class="arrow arrowLeft opacity">➯</div>
-      <div class="arrow arrowRight opacity">➯</div>
+      <div class="arrows-container">
+        <div class="arrow arrowLeft opacity">➯</div>
+        <div class="arrow arrowRight opacity">➯</div>
+      </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
@@ -54,19 +55,19 @@
         var channel;
 
         function fullscreen() {
-          if (webglviewer.requestFullscreen) {
-            webglviewer.requestFullscreen();
-          } else if (webglviewer.msRequestFullscreen) {
-            webglviewer.msRequestFullscreen();
-          } else if (webglviewer.mozRequestFullScreen) {
-            webglviewer.mozRequestFullScreen();
-          } else if (webglviewer.webkitRequestFullscreen) {
-            webglviewer.webkitRequestFullscreen();
+          if (continer.requestFullscreen) {
+            continer.requestFullscreen();
+          } else if (continer.msRequestFullscreen) {
+            continer.msRequestFullscreen();
+          } else if (continer.mozRequestFullScreen) {
+            continer.mozRequestFullScreen();
+          } else if (continer.webkitRequestFullscreen) {
+            continer.webkitRequestFullscreen();
           }
 
         }
 
-        $('#webglviewer').on('click', fullscreen);
+        $('#continer').on('click', fullscreen);
 
         var setupRoleToggle = function () {
           var $roleToggle = $('.toggleRole');
