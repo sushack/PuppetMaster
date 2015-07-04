@@ -2,6 +2,7 @@ body {
   margin: 0px;
   overflow: hidden;
   background: #fff;
+  font-family: Helvetica, sans-serif;
 }
 video{
   position: absolute;
@@ -20,22 +21,30 @@ video{
 #menu {
   position: fixed;
   width: 100%;
-  height:50px;
   background: hotpink;
   z-index: 9999;
+  text-align: center;
 }
-
-ul {
-  margin: 0;
-}
-
-ul li {
-  float: left;
-  display: block;
+#menu label {
   height: 50px;
-  font-size: 1.5em;
-  line-height: 2em;
-  margin-right:20px;
+  display: inline-block;
+  margin: 0 20px;
+  font-size: 30px;
+  padding: 10px 10px 0;
+  line-height: 1;
+  text-transform: uppercase;
+}
+#menu input {
+  vertical-align: middle;
+  width: 40px;
+  height: 40px;
+  border: 4px solid black;
+  border-radius: 100px;
+  -webkit-appearance: none;
+  outline: none;
+}
+#menu input:checked {
+  background: blue;
 }
 
 .opacity {
@@ -46,7 +55,7 @@ ul li {
   display: none;
 }
 
-#leftArrow {
+.arrowLeft {
   position: absolute;
   top:0;
   left:0;
@@ -64,7 +73,7 @@ ul li {
   -ms-filter: "FlipH";
 }
 
-#rightArrow {
+.arrowRight {
   position: absolute;
   top:0;
   right:0;

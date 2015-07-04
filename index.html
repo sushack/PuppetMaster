@@ -6,23 +6,21 @@
   </head>
   <body>
     <div id="menu">
-      <ul>
-        <li><a id="toggleOpacility" href="#">Toggle Opacity</a></li>
-        <li>
-          <label><input type="radio" name="role" id="controllerRadio"> Controller</label>
-          <label><input type="radio" name="role" id="puppetRadio"> Puppet</label>
-        </li>
-        <li><span id="command"></span></li>
-        <li><span id="output"></span></li>
-      </ul>
+          <label>
+            <input type="radio" name="role" value="controller" class="toggleRole" /> Controller
+          </label>
+          <label>
+            <input type="radio" name="role" value="puppet" class="toggleRole" checked/> Puppet
+          </label>
     </div>
 
     <div id="webglviewer"></div>
-    <div id="leftArrow" class="opacity hide">➯</div>
-    <div id="rightArrow" class="opacity hide">➯</div>
+    <div class="arrow arrowLeft opacity hide">➯</div>
+    <div class="arrow arrowRight opacity hide">➯</div>
 
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script src="https://js.pusher.com/2.2/pusher.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-throttle-debounce/1.1/jquery.ba-throttle-debounce.min.js"></script>
 
     <script src="js/third-party/threejs/three.js"></script>
     <script src="js/third-party/threejs/StereoEffect.js"></script>
@@ -33,106 +31,99 @@
       (function ($) {
         'use strict';
 
-        var orientation = {};
-        var myRole;
-
-        var init = function() {
-          window.addEventListener('deviceorientation', listenToOrientationChange, false);
-        };
-
-        $('#toggleOpacility').on('click', function(){
-          $('#webglviewer').toggleClass('opacity');
-        });
-
-        $('#puppetRadio').on('click', function(){
-          if($('#puppetRadio').is(':checked')){
-            $('#leftArrow,#rightArrow').removeClass('hide');
-            myRole = 'puppet';
-          }
-        });
-        $('#controllerRadio').on('click', function(){
-          if($('#controllerRadio').is(':checked')){
-            $('#leftArrow,#rightArrow').addClass('hide');
-            myRole = 'controller';
-          }
-        });
-
-        var debounce = function (func, wait, immediate) {
-          var timeout;
-          return function() {
-            var context = this, args = arguments;
-            var later = function() {
-              timeout = null;
-              if (!immediate) func.apply(context, args);
-            };
-            var callNow = immediate && !timeout;
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-            if (callNow) func.apply(context, args);
-          };
-        };
-
+        // Toggle controller or puppet role
+        var currentRole = 'puppet';
+        var lastChange = 0;
+        var changeOffset = 3;
+        var theEvent = 'client-move';
+        var theChannel = 'private-puppetmaster';
         var pusher = new Pusher('acf435c635f0d94a4870', {
           encrypted: true,
           authTransport: 'jsonp',
           authEndpoint: 'http://185.10.202.250:5000/pusher/auth'
         });
-        var channel = pusher.subscribe('private-puppetmaster');
+        var channel = pusher.subscribe(theChannel);
 
+        var setupRoleToggle = function () {
+          var $roleToggle = $('.toggleRole');
+          $roleToggle.on('click', function () {
+            currentRole = $(this).val();
 
-        channel.bind('client-move', function(data) {
-          console.log(data.message);
-          if(myRole === 'puppet'){
-            if(data.message.toLowerCase().indexOf('left') >= 0) {
-              $('#rightArrow').addClass('opacity');
-              $('#leftArrow').removeClass('opacity');
-            }else if(data.message.toLowerCase().indexOf('right') >= 0) {
-              $('#leftArrow').addClass('opacity');
-              $('#rightArrow').removeClass('opacity');
-            }else if(data.message.toLowerCase().indexOf('stop') >= 0) {
-              $('#leftArrow,#rightArrow').addClass('opacity');
+            if (currentRole === 'puppet') {
+              $('.arrow').removeClass('hide');
+            }else{
+              $('.arrow').addClass('hide');
             }
-          }
-        });
+          });
+        };
 
-        var lastChange = 0;
-        var listenToOrientationChange = function (event) {
-          if(myRole === 'controller'){
-            // gamma: L to R, R is positive
-            // beta: Front to Back, Front is positive
-            // alpha: compass direction
-            var output = document.getElementById('output');
-            var command = document.getElementById('command');
-            orientation = {
-              gamma: event.gamma,
-              beta: event.beta,
-              alpha: event.alpha
-            };
-            var message = '';
-            if (orientation.beta === lastChange) {
-              message = 'Stop!';
+        // C: Detect orientation change
+
+        var detectOrientationChange = function (orientation) {
+          if ( currentRole === 'controller') {
+            var message;
+            var rotationOffset = orientation.beta;
+            var rotatingRight = rotationOffset > changeOffset;
+            var rotationLeft = !rotatingRight;
+            var notRotating =
+              (rotationOffset >= lastChange - changeOffset) &&
+              (rotationOffset <= lastChange + changeOffset);
+
+            if (notRotating) {
+              message = 'stop';
             } else {
-              if (orientation.beta > 0) {
-                message = 'Look Right!';
-              } else {
-                message = 'Look Left!';
+              if (rotatingRight) {
+                message = 'right';
+              }
+              if (rotationLeft) {
+                message = 'left';
               }
             }
-            lastChange = orientation.beta || 0;
-            output.innerHTML = lastChange;
-            command.innerHTML = message;
-            var debouncedOrientationChangeListener = debounce(function() {
-              // All the taxing stuff you do
-              var trigger = channel.trigger('client-move', {
-                'message': message
-              });
-            }, 150);
+            lastChange = rotationOffset;
 
-            debouncedOrientationChangeListener();
+            sendMessage(message);
           }
         };
 
-        init();
+
+        // C: Send messages to server
+
+        var sendMessage = function (message) {
+          channel.trigger(theEvent, {message: message});
+        };
+
+        // P: Handle left/right arrow display
+
+        var listenForEvents = function () {
+
+          channel.bind(theEvent, function (data) {
+            if (currentRole === 'puppet') {
+              $('.arrow').addClass('opacity');
+              if (data.message === 'left') {
+                $('.arrowLeft').toggleClass('opacity');
+              }
+              if (data.message === 'right') {
+                $('.arrowRight').toggleClass('opacity');
+              }
+            }
+          });
+        };
+
+        // P: Send video to C:
+
+        // C: Handle recieving video from P:
+
+        // init
+
+        var init = function () {
+          $(window).on('deviceorientation', $.debounce(detectOrientationChange, 250));
+          listenForEvents();
+        };
+
+        $(function () {
+          init();
+          setupRoleToggle();
+        });
 
       }(window.jQuery));
     </script>
