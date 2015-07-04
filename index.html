@@ -46,24 +46,6 @@
         var pusher;
         var channel;
 
-        function fullscreen() {
-          if (container.requestFullscreen && overlayCanvas.requestFullscreen) {
-            container.requestFullscreen();
-            overlayCanvas.requestFullscreen();
-          } else if (container.msRequestFullscreen && overlayCanvas.msRequestFullscreen) {
-            container.msRequestFullscreen();
-            overlayCanvas.msRequestFullscreen();
-          } else if (container.mozRequestFullScreen && overlayCanvas.mozRequestFullScreen) {
-            container.mozRequestFullScreen();
-            overlayCanvas.mozRequestFullScreen();
-          } else if (container.webkitRequestFullscreen && overlayCanvas.webkitRequestFullscreen) {
-            container.webkitRequestFullscreen();
-            overlayCanvas.webkitRequestFullscreen();
-          }
-        }
-
-        webglviewer.addEventListener('click', fullscreen, false);
-
         var setupRoleToggle = function () {
           var $roleToggle = $('.toggleRole');
           $roleToggle.on('click', function () {
