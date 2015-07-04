@@ -70,7 +70,7 @@
             channel = pusher.subscribe(theChannel);
             listenForEvents();
 
-            //grabClientVideoStream();
+            grabClientVideoStream();
           });
         };
 
@@ -125,6 +125,25 @@
               }
             }
           });
+
+
+          var peer = undefined;
+          channel.bind('client-signal-controller', function(signal) {
+            if (peer === undefined) {
+              peer = new SimplePeer();
+
+              peer.on('signal', function (data) {
+                channel.trigger('client-signal-' + signal.userId, { userId: currentRole, data: data });
+              });
+
+              peer.on('message', function (data) {
+                console.log('got a message from remote peer: ' + data);
+              });
+            }
+
+            peer.signal(signal.data)
+          });
+
         };
 
         // P: Send video to C:
@@ -139,25 +158,14 @@
             // video.src = window.URL.createObjectURL(stream);
             // video.play();
 
-            var peer = new SimplePeer();
-
-            if (currentRole === 'puppet') {
-              peer = new SimplePeer({ initiator: true, stream: stream });
-            }
-
-
+            var peer = new SimplePeer({ initiator: true });
 
             peer.on('signal', function (data) {
-              // peer.signal(data);
-              console.log('signal', data);
+              channel.trigger('client-signal-puppet', { userId: currentRole, data: data });
             });
 
-            peer.on('stream', function (stream) {
-              // got remote video stream, now let's show it in a video tag
-              var video = document.querySelector('video');
-              video.src = window.URL.createObjectURL(stream);
-              video.play();
-              console.log('started stream');
+            peer.on('ready', function () {
+              peer.send('hey peer, how is it going?')
             });
           }
 
