@@ -57,6 +57,7 @@
             }else{
               $('.arrow').addClass('hide');
             }
+            grabClientVideoStream();
           });
         };
 
@@ -161,7 +162,6 @@
         var init = function () {
           $(window).on('deviceorientation', $.throttle(150, true, detectOrientationChange));
           listenForEvents();
-          grabClientVideoStream();
         };
 
         $(function () {
