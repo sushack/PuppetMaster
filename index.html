@@ -69,8 +69,6 @@
             });
             channel = pusher.subscribe(theChannel);
             listenForEvents();
-
-            grabClientVideoStream();
           });
         };
 
@@ -126,55 +124,10 @@
             }
           });
 
-
-          var peer = undefined;
-          channel.bind('client-signal-controller', function(signal) {
-            if (peer === undefined) {
-              peer = new SimplePeer();
-
-              peer.on('signal', function (data) {
-                channel.trigger('client-signal-puppet', { userId: currentRole, data: data });
-              });
-
-              peer.on('message', function (data) {
-                console.log('got a message from remote peer: ' + data);
-              });
-            }
-
-            peer.signal(signal.data)
-          });
-
         };
 
         // P: Send video to C:
 
-        var grabClientVideoStream = function () {
-          navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-          var constraints = { audio: false, video: true };
-          var video = document.getElementById("video");
-
-          function successCallback(stream) {
-            // video.src = window.URL.createObjectURL(stream);
-            // video.play();
-
-            var peer = new SimplePeer({ initiator: true });
-
-            peer.on('signal', function (data) {
-              channel.trigger('client-signal-controller', { userId: currentRole, data: data });
-            });
-
-            peer.on('ready', function () {
-              peer.send('hey peer, how is it going?')
-            });
-          }
-
-          function errorCallback(error){
-            console.log("getUserMedia error: ", error);
-          }
-
-          navigator.getUserMedia(constraints, successCallback, errorCallback);
-        };
 
         // C: Handle recieving video from P:
 
