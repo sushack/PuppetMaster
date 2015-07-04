@@ -88,10 +88,6 @@
             peer.on('call', function(call) {
               call.answer();
               call.on('stream', function(stream) {
-                video = document.createElement('video');
-                video.setAttribute('id', 'video');
-                video.setAttribute('autoplay', true);
-                document.body.appendChild(video);
                 video.src = URL.createObjectURL(stream);
                 video.style.width = '100%';
                 video.style.height = '100%';
