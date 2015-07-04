@@ -133,7 +133,7 @@
               peer = new SimplePeer();
 
               peer.on('signal', function (data) {
-                channel.trigger('client-signal-' + signal.userId, { userId: currentRole, data: data });
+                channel.trigger('client-signal-controller', { userId: currentRole, data: data });
               });
 
               peer.on('message', function (data) {
