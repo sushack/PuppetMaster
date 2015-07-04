@@ -61,8 +61,9 @@
               user_id: currentRole
             });
             channel = pusher.subscribe(theChannel);
+            listenForEvents();
 
-            grabClientVideoStream();
+            //grabClientVideoStream();
           });
         };
 
@@ -166,7 +167,6 @@
 
         var init = function () {
           $(window).on('deviceorientation', $.throttle(150, true, detectOrientationChange));
-          listenForEvents();
         };
 
         $(function () {
