@@ -58,7 +58,11 @@
               encrypted: true,
               authTransport: 'jsonp',
               authEndpoint: 'http://185.10.202.250:5000/pusher/auth',
-              user_id: currentRole
+              auth: {
+                params: {
+                  user_id: currentRole
+                }
+              }
             });
             channel = pusher.subscribe(theChannel);
             listenForEvents();
