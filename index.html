@@ -80,6 +80,7 @@
               }
             }
             lastChange = rotationOffset;
+            console.log(message, lastChange);
 
             sendMessage(message);
           }
@@ -116,7 +117,7 @@
         // init
 
         var init = function () {
-          $(window).on('deviceorientation', $.debounce(detectOrientationChange, 250));
+          $(window).on('deviceorientation', $.debounce(250, detectOrientationChange));
           listenForEvents();
         };
 
