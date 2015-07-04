@@ -1,0 +1,135 @@
+<html lang="en"><head>
+    <title>Cardboard Camera</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="style/style.css">
+  </head>
+  <body>
+    <div id="menu">
+      <ul>
+        <li><a id="toggleOpacility" href="#">Toggle Opacity</a></li>
+        <li>
+          <label><input type="radio" name="role" id="controllerRadio"> Controller</label>
+          <label><input type="radio" name="role" id="puppetRadio"> Puppet</label>
+        </li>
+        <li><span id="output"></span></li>
+      </ul>
+    </div>
+
+    <div id="webglviewer"></div>
+    <div id="leftArrow" class="opacity hide">➯</div>
+    <div id="rightArrow" class="opacity hide">➯</div>
+
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://js.pusher.com/2.2/pusher.min.js"></script>
+
+    <script src="js/third-party/threejs/three.js"></script>
+    <script src="js/third-party/threejs/StereoEffect.js"></script>
+    <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
+    <script src="js/video.js"></script>
+
+    <script>
+      var orientation = {};
+      var myRole;
+
+      var init = function() {
+        window.addEventListener('deviceorientation', listenToOrientationChange, false);
+      };
+
+      $('#toggleOpacility').on('click', function(){
+        $('#webglviewer').toggleClass('opacity');
+      });
+
+      $('#puppetRadio').on('click', function(){
+        if($('#puppetRadio').is(':checked')){
+          $('#leftArrow,#rightArrow').removeClass('hide');
+          myRole = 'puppet';
+        }
+      });
+      $('#controllerRadio').on('click', function(){
+        if($('#controllerRadio').is(':checked')){
+          $('#leftArrow,#rightArrow').addClass('hide');
+          myRole = 'controller';
+        }
+      });
+
+      var debounce = function (func, wait, immediate) {
+        var timeout;
+        return function() {
+          var context = this, args = arguments;
+          var later = function() {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+          };
+          var callNow = immediate && !timeout;
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+          if (callNow) func.apply(context, args);
+        };
+      };
+
+      var pusher = new Pusher('acf435c635f0d94a4870', {
+        encrypted: true,
+        authTransport: 'jsonp',
+        authEndpoint: 'http://185.10.202.250:5000/pusher/auth'
+      });
+      var channel = pusher.subscribe('private-puppetmaster');
+
+
+      channel.bind('client-move', function(data) {
+        console.log(data.message);
+        if(myRole === 'puppet'){
+          if(data.message.toLowerCase().indexOf('left') >= 0) {
+            $('#rightArrow').addClass('opacity');
+            $('#leftArrow').removeClass('opacity');
+          }else if(data.message.toLowerCase().indexOf('right') >= 0) {
+            $('#leftArrow').addClass('opacity');
+            $('#rightArrow').removeClass('opacity');
+          }else if(data.message.toLowerCase().indexOf('stop') >= 0) {
+            $('#leftArrow,#rightArrow').removeClass('opacity');
+          }
+        }
+      });
+
+      var lastChange = 0;
+      var listenToOrientationChange = function (event) {
+        if(myRole === "controller"){
+          // gamma: L to R, R is positive
+          // beta: Front to Back, Front is positive
+          // alpha: compass direction
+          var output = document.getElementById('output');
+          orientation = {
+            gamma: event.gamma,
+            beta: event.beta,
+            alpha: event.alpha
+          };
+          var message;
+          if (orientation.beta === lastChange) {
+            message = 'Stop!';
+          } else {
+            if (orientation.beta > 0) {
+              message = 'Look Right!';
+            } else {
+              message = 'Look Left!';
+            }
+          }
+          lastChange = orientation.beta;
+          // Send to Pusher
+
+          output.innerHTML = message;
+          var debouncedOrientationChangeListener = debounce(function() {
+            // All the taxing stuff you do
+            var trigger = channel.trigger('client-move', {
+              "message": message
+            });
+          }, 150);
+
+          debouncedOrientationChangeListener();
+        }
+      };
+
+      init();
+
+    </script>
+  </body>
+</html>
