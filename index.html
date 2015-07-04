@@ -59,9 +59,10 @@
 
         // C: Detect orientation change
 
-        var detectOrientationChange = function (orientation) {
+        var detectOrientationChange = function () {
           if ( currentRole === 'controller') {
             var message;
+            var orientation = arguments[0].originalEvent;
             var rotationOffset = orientation.beta;
             var rotatingRight = rotationOffset > changeOffset;
             var rotationLeft = !rotatingRight;
@@ -79,7 +80,7 @@
                 message = 'left';
               }
             }
-            lastChange = rotationOffset;
+            lastChange = rotationOffset || 0;
             console.log(message, lastChange);
 
             sendMessage(message);
