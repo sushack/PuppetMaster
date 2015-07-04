@@ -25,6 +25,15 @@ b. The Controller
 The easy part of this was sending instructions from one client to the other, using Pusher and a simple Node server as a message relay. The hard part was hooking up WebRTC over PeerJS to send the video from client to client.
 
 
+## Server side
+
+The server is a NodeJS server, using [ExpressJS](http://expressjs.com).
+
+``` bash
+npm install express body-parser pusher
+APP_ID='foo' APP_KEY='bar' APP_SECRET='baz' node server.js
+```
+
 ### How cool do we look? 
 ![](http://i.imgur.com/Se3RAwV.jpg)
 
