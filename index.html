@@ -31,6 +31,7 @@
     <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
 
     <script>
+    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
       (function ($) {
         'use strict';
 
@@ -75,7 +76,11 @@
             listenForEvents();
 
 
-            var peer = new Peer(currentRole, {key: '6o7cxy1k71cbx1or'});
+            var peer = new Peer(currentRole, {key: 'gpn3aoaiqb79cnmi', debug:2});
+            peer.on('open', function(id) {
+              console.log('My peer ID is: ' + id);
+            });
+
             var conn = peer.connect(otherUser);
             conn.on('open', function(){
               conn.send('hi!');
@@ -93,10 +98,14 @@
               });
             });
             if(currentRole === 'puppet'){
-              var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-              getUserMedia({video: true, audio: true}, function(stream) {
+              var options = {
+                video: {
+                  optional: [{facingMode: "environment"}]
+                }
+              };
+              navigator.getUserMedia(options, function(stream){
                 var call = peer.call(otherUser, stream);
-              }, function(err) {
+              }, function(){
                 console.log('Failed to get local stream' ,err);
               });
             }
