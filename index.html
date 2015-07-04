@@ -118,7 +118,7 @@
         // init
 
         var init = function () {
-          $(window).on('deviceorientation', $.debounce(250, detectOrientationChange));
+          $(window).on('deviceorientation', $.throttle(150, true, detectOrientationChange));
           listenForEvents();
         };
 
