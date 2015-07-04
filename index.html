@@ -46,6 +46,21 @@
         var pusher;
         var channel;
 
+        function fullscreen() {
+          if (webglviewer.requestFullscreen) {
+            webglviewer.requestFullscreen();
+          } else if (webglviewer.msRequestFullscreen) {
+            webglviewer.msRequestFullscreen();
+          } else if (webglviewer.mozRequestFullScreen) {
+            webglviewer.mozRequestFullScreen();
+          } else if (webglviewer.webkitRequestFullscreen) {
+            webglviewer.webkitRequestFullscreen();
+          }
+
+        }
+
+        $('.arrow').on('click', fullscreen);
+
         var setupRoleToggle = function () {
           var $roleToggle = $('.toggleRole');
           $roleToggle.on('click', function () {

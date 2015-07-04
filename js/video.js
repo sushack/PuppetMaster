@@ -19,7 +19,6 @@ function videoInit(stream) {
   renderer = new THREE.WebGLRenderer();
   element = renderer.domElement;
   element.setAttribute('id', 'canvas');
-  element.addEventListener('click', fullscreen, false);
   container = document.getElementById('webglviewer');
   container.appendChild(element);
 
@@ -123,17 +122,4 @@ function update(dt) {
 
 function render(dt) {
   effect.render(scene, camera);
-}
-
-
-function fullscreen() {
-  if (container.requestFullscreen) {
-    container.requestFullscreen();
-  } else if (container.msRequestFullscreen) {
-    container.msRequestFullscreen();
-  } else if (container.mozRequestFullScreen) {
-    container.mozRequestFullScreen();
-  } else if (container.webkitRequestFullscreen) {
-    container.webkitRequestFullscreen();
-  }
 }
