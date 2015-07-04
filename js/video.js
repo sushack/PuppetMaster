@@ -10,9 +10,7 @@ var scene,
 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-init();
-
-function init() {
+function videoInit(stream) {
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.001, 700);
   camera.position.set(0, 15, 0);
@@ -25,7 +23,7 @@ function init() {
   container.appendChild(element);
 
   video = document.createElement('video');
-  video.setAttribute('id', 'video');
+  video.setAttribute('id', 'video2');
   video.setAttribute('autoplay', true);
   document.body.appendChild(video);
 
@@ -42,22 +40,27 @@ function init() {
     }
   };
 
-  if (typeof MediaStreamTrack === 'undefined' && navigator.getUserMedia) {
-    alert('This browser isn\'t supported');
-  } else {
-    MediaStreamTrack.getSources(function(sources) {
-      for (var i = 0; i !== sources.length; ++i) {
-        var source = sources[i];
-        if (source.kind === 'video') {
-          if (source.facing && source.facing == "environment") {
-            options.video.optional.push({'sourceId': source.id});
+  if(stream){
+    streamFound(stream);
+  }else{
+    if (typeof MediaStreamTrack === 'undefined' && navigator.getUserMedia) {
+      alert('This browser isn\'t supported');
+    } else {
+      MediaStreamTrack.getSources(function(sources) {
+        for (var i = 0; i !== sources.length; ++i) {
+          var source = sources[i];
+          if (source.kind === 'video') {
+            if (source.facing && source.facing == "environment") {
+              options.video.optional.push({'sourceId': source.id});
+            }
           }
         }
-      }
 
-      navigator.getUserMedia(options, streamFound, streamError);
-    });
+        navigator.getUserMedia(options, streamFound, streamError);
+      });
+    }
   }
+
 
   function streamFound(stream) {
     video.src = URL.createObjectURL(stream);

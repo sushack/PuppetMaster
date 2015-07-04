@@ -14,7 +14,7 @@
       </label>
     </div>
 
-    <!-- <div id="webglviewer"></div> -->
+    <div id="webglviewer"></div>
     <video id="video"></video>
     <div class="arrow arrowLeft opacity">➯</div>
     <div class="arrow arrowRight opacity">➯</div>
@@ -26,7 +26,7 @@
     <script src="js/third-party/threejs/three.js"></script>
     <script src="js/third-party/threejs/StereoEffect.js"></script>
     <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
-    <!-- <script src="js/video.js"></script> -->
+    <script src="js/video.js"></script>
 
     <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
 
@@ -80,18 +80,10 @@
             peer.on('open', function(id) {
               console.log('My peer ID is: ' + id);
             });
-
-            var conn = peer.connect(otherUser);
-            conn.on('open', function(){
-              conn.send('hi!');
-            });
             peer.on('call', function(call) {
               call.answer();
               call.on('stream', function(stream) {
-                video.src = URL.createObjectURL(stream);
-                video.style.width = '100%';
-                video.style.height = '100%';
-                video.play();
+                videoInit(stream);
               });
             });
             if(currentRole === 'puppet'){
@@ -102,6 +94,7 @@
               };
               navigator.getUserMedia(options, function(stream){
                 var call = peer.call(otherUser, stream);
+                videoInit();
               }, function(){
                 console.log('Failed to get local stream' ,err);
               });
