@@ -92,11 +92,22 @@
                   optional: [{facingMode: "environment"}]
                 }
               };
-              navigator.getUserMedia(options, function(stream){
-                var call = peer.call(otherUser, stream);
-                videoInit();
-              }, function(){
-                console.log('Failed to get local stream' ,err);
+              MediaStreamTrack.getSources(function(sources) {
+                for (var i = 0; i !== sources.length; ++i) {
+                  var source = sources[i];
+                  if (source.kind === 'video') {
+                    if (source.facing && source.facing == "environment") {
+                      options.video.optional.push({'sourceId': source.id});
+                    }
+                  }
+                }
+
+                navigator.getUserMedia(options, function(stream){
+                  var call = peer.call(otherUser, stream);
+                  videoInit();
+                }, function(){
+                  console.log('Failed to get local stream' ,err);
+                });
               });
             }
 
