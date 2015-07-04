@@ -28,12 +28,15 @@
     <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
     <!-- <script src="js/video.js"></script> -->
 
+    <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
+
     <script>
       (function ($) {
         'use strict';
 
         // Toggle controller or puppet role
         var currentRole = 'puppet';
+        var otherUser = 'controller';
         var lastChange = 0;
         var changeOffset = 3;
         var theEvent = 'client-move';
@@ -49,8 +52,10 @@
 
             if (currentRole === 'puppet') {
               $('.arrow').removeClass('hide');
+              otherUser = 'controller';
             }else{
               $('.arrow').addClass('hide');
+              otherUser = 'puppet';
             }
 
             if(pusher){
@@ -68,6 +73,34 @@
             });
             channel = pusher.subscribe(theChannel);
             listenForEvents();
+
+
+            var peer = new Peer(currentRole, {key: '6o7cxy1k71cbx1or'});
+            var conn = peer.connect(otherUser);
+            conn.on('open', function(){
+              conn.send('hi!');
+            });
+            peer.on('call', function(call) {
+              call.on('stream', function(stream) {
+                video = document.createElement('video');
+                video.setAttribute('id', 'video');
+                video.setAttribute('autoplay', true);
+                document.body.appendChild(video);
+                video.src = URL.createObjectURL(stream);
+                video.style.width = '100%';
+                video.style.height = '100%';
+                video.play();
+              });
+            });
+            if(currentRole === 'puppet'){
+              var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+              getUserMedia({video: true, audio: true}, function(stream) {
+                var call = peer.call(otherUser, stream);
+              }, function(err) {
+                console.log('Failed to get local stream' ,err);
+              });
+            }
+
           });
         };
 
