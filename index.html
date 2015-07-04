@@ -37,6 +37,7 @@
         var changeOffset = 3;
         var theEvent = 'client-move';
         var theChannel = 'private-puppetmaster';
+        var messageTimout;
         var pusher = new Pusher('acf435c635f0d94a4870', {
           encrypted: true,
           authTransport: 'jsonp',
@@ -66,23 +67,15 @@
             var rotationOffset = orientation.beta;
             var rotatingRight = rotationOffset > changeOffset;
             var rotationLeft = !rotatingRight;
-            var notRotating =
-              (rotationOffset >= lastChange - changeOffset) &&
-              (rotationOffset <= lastChange + changeOffset);
 
-            if (notRotating) {
-              message = 'stop';
-            } else {
-              if (rotatingRight) {
-                message = 'right';
-              }
-              if (rotationLeft) {
-                message = 'left';
-              }
+            if (rotatingRight) {
+              message = 'right';
             }
-            lastChange = rotationOffset || 0;
-            console.log(message, lastChange);
+            if (rotationLeft) {
+              message = 'left';
+            }
 
+            lastChange = rotationOffset || 0;
             sendMessage(message);
           }
         };
@@ -91,7 +84,14 @@
         // C: Send messages to server
 
         var sendMessage = function (message) {
+          console.log(message);
+          clearTimeout(messageTimout);
           channel.trigger(theEvent, {message: message});
+          if (message !== 'stop') {
+            messageTimout = setTimeout(function () {
+              sendMessage('stop');
+            }, 1000);
+          }
         };
 
         // P: Handle left/right arrow display
