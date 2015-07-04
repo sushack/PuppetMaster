@@ -86,6 +86,7 @@
               conn.send('hi!');
             });
             peer.on('call', function(call) {
+              call.answer();
               call.on('stream', function(stream) {
                 video = document.createElement('video');
                 video.setAttribute('id', 'video');
