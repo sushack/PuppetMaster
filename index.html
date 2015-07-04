@@ -14,7 +14,8 @@
       </label>
     </div>
 
-    <div id="webglviewer"></div>
+    <!-- <div id="webglviewer"></div> -->
+    <video id="video"></video>
     <div class="arrow arrowLeft opacity">➯</div>
     <div class="arrow arrowRight opacity">➯</div>
 
@@ -22,10 +23,11 @@
     <script src="https://js.pusher.com/2.2/pusher.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-throttle-debounce/1.1/jquery.ba-throttle-debounce.min.js"></script>
 
+    <script src="js/third-party/simplepeer.min.js"></script>
     <script src="js/third-party/threejs/three.js"></script>
     <script src="js/third-party/threejs/StereoEffect.js"></script>
     <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
-    <script src="js/video.js"></script>
+    <!-- <script src="js/video.js"></script> -->
 
     <script>
       (function ($) {
@@ -113,6 +115,43 @@
 
         // P: Send video to C:
 
+        var grabClientVideoStream = function () {
+          navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+          var constraints = { audio: false, video: true };
+          var video = document.getElementById("video");
+
+          function successCallback(stream) {
+            // video.src = window.URL.createObjectURL(stream);
+            // video.play();
+
+            var peer1 = new SimplePeer({ initiator: true, stream: stream });
+            var peer2 = new SimplePeer();
+
+            peer1.on('signal', function (data) {
+              peer2.signal(data);
+            });
+
+            peer2.on('signal', function (data) {
+              peer1.signal(data);
+            });
+
+            peer2.on('stream', function (stream) {
+              // got remote video stream, now let's show it in a video tag
+              var video = document.querySelector('video');
+              video.src = window.URL.createObjectURL(stream);
+              video.play();
+            });
+
+          }
+
+          function errorCallback(error){
+            console.log("getUserMedia error: ", error);
+          }
+
+          navigator.getUserMedia(constraints, successCallback, errorCallback);
+        };
+
         // C: Handle recieving video from P:
 
         // init
@@ -120,6 +159,7 @@
         var init = function () {
           $(window).on('deviceorientation', $.throttle(150, true, detectOrientationChange));
           listenForEvents();
+          grabClientVideoStream();
         };
 
         $(function () {
