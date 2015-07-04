@@ -12,6 +12,7 @@
           <label><input type="radio" name="role" id="controllerRadio"> Controller</label>
           <label><input type="radio" name="role" id="puppetRadio"> Puppet</label>
         </li>
+        <li><span id="command"></span></li>
         <li><span id="output"></span></li>
       </ul>
     </div>
@@ -98,6 +99,7 @@
           // beta: Front to Back, Front is positive
           // alpha: compass direction
           var output = document.getElementById('output');
+          var command = document.getElementById('command');
           orientation = {
             gamma: event.gamma,
             beta: event.beta,
@@ -114,9 +116,8 @@
             }
           }
           lastChange = orientation.beta;
-          // Send to Pusher
-
-          output.innerHTML = message;
+          output.innerHTML = lastChange;
+          command.innerHTML = message;
           var debouncedOrientationChangeListener = debounce(function() {
             // All the taxing stuff you do
             var trigger = channel.trigger('client-move', {
