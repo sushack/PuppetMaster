@@ -54,6 +54,9 @@
               $('.arrow').addClass('hide');
             }
 
+            if(pusher){
+              pusher.disconnect();
+            }
             pusher = new Pusher('acf435c635f0d94a4870', {
               encrypted: true,
               authTransport: 'jsonp',
