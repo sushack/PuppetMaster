@@ -70,10 +70,11 @@ video {
   top: 0;
   bottom: 0;
   width: 50%;
-  height: 200px;
+  height: 150px;
   margin: auto;
-  font-size: 200px;
+  font-size: 150px;
   text-align: center;
+  transition: all .4s ease;
 
   &.arrowLeft {
     transform: scaleX(-1);
