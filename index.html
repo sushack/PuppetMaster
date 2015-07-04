@@ -133,7 +133,7 @@
               peer = new SimplePeer();
 
               peer.on('signal', function (data) {
-                channel.trigger('client-signal-controller', { userId: currentRole, data: data });
+                channel.trigger('client-signal-puppet', { userId: currentRole, data: data });
               });
 
               peer.on('message', function (data) {
@@ -161,7 +161,7 @@
             var peer = new SimplePeer({ initiator: true });
 
             peer.on('signal', function (data) {
-              channel.trigger('client-signal-puppet', { userId: currentRole, data: data });
+              channel.trigger('client-signal-controller', { userId: currentRole, data: data });
             });
 
             peer.on('ready', function () {
