@@ -1,6 +1,6 @@
 # PuppetMaster
 
-A [Pusher](http://pusher.com), [PeerJS](peerjs.com), [Google Cardboard](http://www.google.com/get/cardboard/) experiment.
+A [Pusher](http://pusher.com), [PeerJS](http://peerjs.com), [Google Cardboard](http://www.google.com/get/cardboard/) experiment.
 
 ## What the hell is this?
 
